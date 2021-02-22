@@ -3,46 +3,48 @@ import os, glob
 from os import listdir
 from os.path import isfile, join
 
-
-path    = '/home/patrick/Documents/DUPAK_LEKTOR/'
+path    = os.path.dirname(os.path.realpath(__file__))
+# path    = "/home/patrick/Documents/DUPAK_LEKTOR/Bidang_C/" 
 subdir  = []
 
-def merge(files):
-    merger = PdfFileMerger()
+def merge(files, final_path):
+    merger = PdfFileMerger(strict=False)
     for pdf in files:        
-        merger.append(path+pdf)
-
-    merger.write(path+"result.pdf")
+        merger.append(pdf)    
+    merger.write(final_path+"/result.pdf")
     merger.close()
 
+    splitted        = final_path.split("/")
+    splitted[-1]    = "Done-"+splitted[-1]
+    new_root        = "/".join(splitted) 
+    os.rename(final_path, new_root)
+    
 def open_subdirectory(path):
     '''
     pakai flag. kalau sampai direktory terbawah, flah done diset true. Lalu up 1 level.
     Besok dipikir mau pakai dictionary atau list
     '''
-    pass
+    if len(path) > 0:
+        for folder in path:
+            for root, dir, files  in os.walk(folder):    
+                if len(files) > 1 and "result.pdf" not in files:
+                    print("Merging at ", root)
+                    files = [root+"/"+file for file in files]
+                    # print(files)
+                    merge(files, root)               
 
 def open_directory(path):
-
     pattern = os.path.join(path, '*')
     
     for candidate in glob.glob(pattern):
         if os.path.isdir(candidate):
-            print("{0} is a directory".format(candidate))
+            # print("{0} is a directory".format(candidate))
             subdir.append(candidate)
         elif os.path.isfile(candidate):  
             print("{0} is a normal file".format(candidate))  
         else:
             print('No directories found')
-    # for path, subdirs, files in os.walk(path):
-    #    print(subdirs)
-        #for name in files:
-            #print(os.path.join(path, name))
-    #subdir = [f for f in listdir(path) if isfile(join(path, f))]
-    #return files
+    
+    open_subdirectory(subdir)
 
 open_directory(path)
-
-
-
-
