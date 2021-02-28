@@ -9,13 +9,15 @@ subdir  = []
 
 def merge(files, final_path):
     merger = PdfFileMerger(strict=False)
+    files.sort()
     for pdf in files:        
         merger.append(pdf)    
     merger.write(final_path+"/result.pdf")
     merger.close()
 
     splitted        = final_path.split("/")
-    splitted[-1]    = "Done-"+splitted[-1]
+    if "Done" not in splitted[-1]:
+        splitted[-1]    = "Done-"+splitted[-1]
     new_root        = "/".join(splitted) 
     os.rename(final_path, new_root)
     
